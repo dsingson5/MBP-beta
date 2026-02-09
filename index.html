@@ -1,1 +1,75 @@
-<html><body><h1>MBP Beta - Deploying soon...</h1></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shiny App</title>
+    <script
+      src="./shinylive/load-shinylive-sw.js"
+      type="module"
+    ></script>
+    <script type="module">
+      import { runExportedApp } from "./shinylive/shinylive.js";
+      runExportedApp({
+        id: "root",
+        appEngine: "python",
+        relPath: "",
+      });
+    </script>
+    <link rel="stylesheet" href="./shinylive/style-resets.css" />
+    <link rel="stylesheet" href="./shinylive/shinylive.css" />
+    
+  </head>
+  <body>
+<style>
+.mbp-loading-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: #222; z-index: 99999; display: flex; flex-direction: column;
+  justify-content: center; align-items: center; font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.mbp-loading-overlay h2 { color: #e0e0e0; font-size: 1.5rem; margin-bottom: 0.5rem; }
+.mbp-loading-overlay p { color: #aaa; font-size: 1rem; margin-bottom: 2rem; }
+.mbp-skeleton-container { width: 340px; }
+.mbp-skeleton {
+  height: 16px; border-radius: 8px; margin-bottom: 12px;
+  background: linear-gradient(90deg, #333 25%, #444 50%, #333 75%);
+  background-size: 200% 100%;
+  animation: mbp-shimmer 1.5s ease-in-out infinite;
+}
+.mbp-skeleton.w80 { width: 80%; } .mbp-skeleton.w60 { width: 60%; }
+.mbp-skeleton.w90 { width: 90%; } .mbp-skeleton.w70 { width: 70%; }
+.mbp-skeleton.w50 { width: 50%; }
+.mbp-skeleton.tall { height: 24px; margin-bottom: 18px; }
+@keyframes mbp-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+</style>
+<div class="mbp-loading-overlay" id="mbpLoadingOverlay">
+  <h2>Metric Based Phasing — BETA</h2>
+  <p>For first time loading the webapp, this might take long.<br>Kindly wait. Thank you!</p>
+  <div class="mbp-skeleton-container">
+    <div class="mbp-skeleton tall w80"></div>
+    <div class="mbp-skeleton w90"></div>
+    <div class="mbp-skeleton w60"></div>
+    <div class="mbp-skeleton w70"></div>
+    <div class="mbp-skeleton w50"></div>
+    <div class="mbp-skeleton w80"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var observer = new MutationObserver(function(mutations){
+    if(document.querySelector("#shiny-app") || document.querySelector(".container-fluid") || document.querySelector(".navbar")){
+      var ol = document.getElementById("mbpLoadingOverlay");
+      if(ol){ ol.style.transition="opacity 0.5s"; ol.style.opacity="0"; setTimeout(function(){ ol.remove(); },600); }
+      observer.disconnect();
+    }
+  });
+  observer.observe(document.body, {childList: true, subtree: true});
+  setTimeout(function(){ var ol=document.getElementById("mbpLoadingOverlay"); if(ol) ol.remove(); }, 60000);
+})();
+</script>
+
+    
+    <div style="height: 100vh; width: 100vw" id="root"></div>
+    
+  </body>
+</html>
