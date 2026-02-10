@@ -19,7 +19,17 @@
     <link rel="stylesheet" href="./shinylive/style-resets.css" />
     <link rel="stylesheet" href="./shinylive/shinylive.css" />
     
-  </head>
+  
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://pypi.org" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://pypi.org">
+<script>
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("./sw.js").catch(function(){});
+}
+</script>
+</head>
   <body>
 <style>
 .mbp-loading-overlay {
@@ -30,6 +40,10 @@
 .mbp-loading-overlay h2 { color: #e0e0e0; font-size: 1.5rem; margin-bottom: 0.5rem; }
 .mbp-loading-overlay p { color: #aaa; font-size: 1rem; margin-bottom: 1.2rem; text-align: center; line-height: 1.5; }
 .mbp-loading-overlay .mbp-updated { color: #888; font-size: 0.85rem; margin-bottom: 1.5rem; }
+.mbp-progress-container { width: 280px; margin-bottom: 18px; }
+.mbp-progress-bar { width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; }
+.mbp-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #0074D9, #39CCCC); border-radius: 3px; transition: width 0.5s ease; }
+.mbp-progress-label { color: #888; font-size: 0.75rem; margin-top: 6px; text-align: center; }
 .mbp-skeleton-container { width: 340px; }
 .mbp-skeleton {
   height: 16px; border-radius: 8px; margin-bottom: 12px;
@@ -46,7 +60,11 @@
 <div class="mbp-loading-overlay" id="mbpLoadingOverlay">
   <h2>Metric Based Phasing — BETA</h2>
   <p>For first time loading the webapp, this might take long.<br>Kindly wait. Thank you!</p>
-  <div class="mbp-updated">Last updated: February 10, 2026 — 08:20 PM PHT</div>
+  <div class="mbp-updated">Last updated: February 10, 2026 — 08:48 PM PHT</div>
+  <div class="mbp-progress-container">
+    <div class="mbp-progress-bar"><div class="mbp-progress-fill" id="mbpProgressFill"></div></div>
+    <div class="mbp-progress-label" id="mbpProgressLabel">Loading runtime...</div>
+  </div>
   <div class="mbp-skeleton-container">
     <div class="mbp-skeleton tall w80"></div>
     <div class="mbp-skeleton w90"></div>
@@ -58,15 +76,32 @@
 </div>
 <script>
 (function(){
+  var fill = document.getElementById("mbpProgressFill");
+  var label = document.getElementById("mbpProgressLabel");
+  var steps = [
+    {pct: 15, text: "Downloading Python runtime...", delay: 0},
+    {pct: 35, text: "Loading core packages...", delay: 3000},
+    {pct: 55, text: "Installing dependencies...", delay: 8000},
+    {pct: 75, text: "Initializing app...", delay: 15000},
+    {pct: 90, text: "Almost ready...", delay: 25000}
+  ];
+  steps.forEach(function(s){
+    setTimeout(function(){
+      if(fill && label){ fill.style.width = s.pct + "%"; label.textContent = s.text; }
+    }, s.delay);
+  });
+
   var observer = new MutationObserver(function(mutations){
     if(document.querySelector("#shiny-app") || document.querySelector(".container-fluid") || document.querySelector(".navbar")){
+      if(fill) fill.style.width = "100%";
+      if(label) label.textContent = "Ready!";
       var ol = document.getElementById("mbpLoadingOverlay");
       if(ol){ ol.style.transition="opacity 0.5s"; ol.style.opacity="0"; setTimeout(function(){ ol.remove(); },600); }
       observer.disconnect();
     }
   });
   observer.observe(document.body, {childList: true, subtree: true});
-  setTimeout(function(){ var ol=document.getElementById("mbpLoadingOverlay"); if(ol) ol.remove(); }, 60000);
+  setTimeout(function(){ var ol=document.getElementById("mbpLoadingOverlay"); if(ol) ol.remove(); }, 120000);
 })();
 </script>
 
