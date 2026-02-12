@@ -23,20 +23,25 @@
 <script>
 (function(){
   if(sessionStorage.getItem("mbp_skip_redirect")) return;
-  var g="https://gist.githubusercontent.com/dsingson5/9082bc53da1e4efb0eeee33246a2d918/raw/mbp_server_url.txt";
-  var x=new XMLHttpRequest(); x.open("GET",g,true); x.timeout=4000;
-  x.onload=function(){
-    try{ var d=JSON.parse(x.responseText);
-      if(d.shiny_url){
-        var p=new XMLHttpRequest();
-        p.open("GET",d.shiny_url+"/",true); p.timeout=3000;
-        p.setRequestHeader("ngrok-skip-browser-warning","1");
-        p.onload=function(){ if(p.status===200) window.location.replace(d.shiny_url); };
-        p.onerror=function(){}; p.ontimeout=function(){}; p.send();
-      }
-    }catch(e){}
-  };
-  x.onerror=function(){}; x.ontimeout=function(){}; x.send();
+  var shinyGist="https://gist.githubusercontent.com/dsingson5/9082bc53da1e4efb0eeee33246a2d918/raw/mbp_server_url.txt";
+  var proxyGist="https://gist.githubusercontent.com/dsingson5/20210ef251a6c4ebf1141068e9be2717/raw/proxy_url.txt";
+  fetch(shinyGist,{cache:"no-store"}).then(function(r){return r.json();}).then(function(d){
+    if(!d.shiny_url) return;
+    var shinyUrl=d.shiny_url;
+    fetch(proxyGist,{cache:"no-store"}).then(function(r2){return r2.text();}).then(function(apiUrl){
+      apiUrl=apiUrl.trim().replace(/\/$/,"");
+      if(!apiUrl) return;
+      fetch(apiUrl+"/api/ping",{mode:"cors",cache:"no-store"}).then(function(r3){
+        if(r3.ok){
+          var lbl=document.getElementById("mbpProgressLabel");
+          var fill=document.getElementById("mbpProgressFill");
+          if(lbl) lbl.textContent="Server found! Redirecting...";
+          if(fill) fill.style.width="100%";
+          window.location.replace(shinyUrl);
+        }
+      }).catch(function(){});
+    }).catch(function(){});
+  }).catch(function(){});
 })();
 </script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -79,10 +84,10 @@ if("serviceWorker" in navigator){
 <div class="mbp-loading-overlay" id="mbpLoadingOverlay">
   <h2>Metric Based Phasing — BETA <span style="font-size:0.45em;font-weight:600;padding:2px 10px;border-radius:8px;vertical-align:middle;background:rgba(56,189,248,0.15);color:#38bdf8;margin-left:6px;">☁️ Shinylive</span></h2>
   <p>For first time loading the webapp, this might take long.<br>Kindly wait. Thank you!</p>
-  <div class="mbp-updated">Last updated: February 12, 2026 — 06:00 PM PHT</div>
+  <div class="mbp-updated">Last updated: February 12, 2026 — 06:03 PM PHT</div>
   <div class="mbp-progress-container">
     <div class="mbp-progress-bar"><div class="mbp-progress-fill" id="mbpProgressFill"></div></div>
-    <div class="mbp-progress-label" id="mbpProgressLabel">Loading runtime...</div>
+    <div class="mbp-progress-label" id="mbpProgressLabel">Checking for dedicated server...</div>
   </div>
   <div class="mbp-skeleton-container">
     <div class="mbp-skeleton tall w80"></div>
@@ -98,11 +103,12 @@ if("serviceWorker" in navigator){
   var fill = document.getElementById("mbpProgressFill");
   var label = document.getElementById("mbpProgressLabel");
   var steps = [
-    {pct: 15, text: "Downloading Python runtime...", delay: 0},
-    {pct: 35, text: "Loading core packages...", delay: 3000},
-    {pct: 55, text: "Installing dependencies...", delay: 8000},
-    {pct: 75, text: "Initializing app...", delay: 15000},
-    {pct: 90, text: "Almost ready...", delay: 25000}
+    {pct: 5,  text: "Checking for dedicated server...", delay: 0},
+    {pct: 15, text: "Server not found — loading Shinylive...", delay: 4500},
+    {pct: 35, text: "Downloading Python runtime...", delay: 6000},
+    {pct: 55, text: "Loading core packages...", delay: 10000},
+    {pct: 75, text: "Installing dependencies...", delay: 16000},
+    {pct: 90, text: "Almost ready...", delay: 27000}
   ];
   steps.forEach(function(s){
     setTimeout(function(){
