@@ -1,4 +1,4 @@
-const CACHE_NAME = "mbp-cache-v1771932529";
+const CACHE_NAME = "mbp-cache-v1771932686";
 const HEAVY_ASSETS = /\.(wasm|whl)(\?|$)/;
 const LIGHT_ASSETS = /\.(js|json|css|ico)(\?|$)/;
 self.addEventListener("install", function(e){ self.skipWaiting(); });
